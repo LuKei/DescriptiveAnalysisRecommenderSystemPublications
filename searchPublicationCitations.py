@@ -52,7 +52,7 @@ publication_df = pandas.read_sql('select * from publication', connIn)
 
 matches = generate_reference_matches(reference_df, publication_df)
 
-with open('pickles/matchedCitationHierarchy2.pkl', 'wb') as f:
+with open('pickles/publicationCitations.pkl', 'wb') as f:
     pickle.dump(matches, f, pickle.HIGHEST_PROTOCOL)
 
 print('success')
