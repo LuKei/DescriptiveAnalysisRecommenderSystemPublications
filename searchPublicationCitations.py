@@ -27,7 +27,7 @@ def generate_reference_matches(reference_df, publication_df):
     :param reference_df:
     :return: matched_df
     '''
-    c, match = 0, []
+    c, matches = 0, {}
     reference_df['ref_id'] = reference_df.index
     for publication in publication_df.itertuples():
         ind_series = reference_df.apply(lambda x: match_title_and_id(x['pid'] ,publication_df['id'], match_title(x['title'], publication.title,
@@ -42,14 +42,14 @@ def generate_reference_matches(reference_df, publication_df):
             c += 1
             continue
         if indices.size:
-            match.append({'id': publication.id, 'indices': set(pid_indices)})
+            matches[publication.id] = set(pid_indices)
             reference_df.drop(indices, inplace=True)
         else:
-            match.append({'id':publication.id, 'indices': set()})
+            matches[publication.id] = set(pid_indices)
         c += 1
         if c % 100 == 0:
             print(time.strftime("%H:%M:%S", time.gmtime()) + " #" + str(c))
-    return match
+    return matches
 
 
 reference_df = pandas.read_pickle('pickles/citationHierarchy.pkl')

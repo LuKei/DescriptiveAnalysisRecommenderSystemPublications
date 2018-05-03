@@ -6,24 +6,25 @@ from datetime import datetime
 dbname = 'publications20180322_184739 _erweitert'
 connIn = sqlite3.connect(dbname + '.db')
 dfPublications = pandas.read_sql('select * from publication', connIn)
-matches = pickle.load(open('pickles/publicationCitations.pkl', 'rb'))
+citations = pickle.load(open('pickles/publicationCitations.pkl', 'rb'))
 
 citedCSSeries = pandas.Series(dtype=int)
 citedISSeries = pandas.Series(dtype=int)
 citedTotalSeries = pandas.Series(dtype=int)
 
-for i in range(0, len(matches)):
-    match = matches[i]
-    publication = dfPublications[dfPublications['id'] == match['id']].iloc[0]
+i = 0
+for publication in dfPublications.itertuples():
     # get publications of the each field that cite the publication
-    ind_series_CS = dfPublications.apply(lambda x: x['id'] in match['indices'] and x['field'] == 'CS', axis=1)
-    ind_series_IS = dfPublications.apply(lambda x: x['id'] in match['indices'] and x['field'] == 'IS', axis=1)
+    citation_set = citations[publication.id]
+    ind_series_CS = dfPublications.apply(lambda x: x['id'] in citation_set and x['field'] == 'CS', axis=1)
+    ind_series_IS = dfPublications.apply(lambda x: x['id'] in citation_set and x['field'] == 'IS', axis=1)
     publications_CS_citing = dfPublications[ind_series_CS]
     publications_IS_citing = dfPublications[ind_series_IS]
     citedCSSeries = citedCSSeries.append(pandas.Series([len(publications_CS_citing)]), ignore_index=True)
     citedISSeries = citedISSeries.append(pandas.Series([len(publications_IS_citing)]), ignore_index=True)
-    citedTotalSeries = citedTotalSeries.append(pandas.Series([len(match['indices'])]), ignore_index=True)
+    citedTotalSeries = citedTotalSeries.append(pandas.Series([len(citation_set)]), ignore_index=True)
 
+    i += 1
     if i % 100 == 0:
         print('iteration: #' + str(i))
 
